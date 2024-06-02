@@ -1,7 +1,8 @@
 <template>
-  <router-view></router-view>
+  <div class="app">
+    <router-view></router-view>
+  </div>
 </template>
-
 
 <script setup lang="ts">
 import { RouterView } from 'vue-router';
@@ -10,4 +11,8 @@ import { RouterView } from 'vue-router';
 </script>
 
 <style scoped lang="less">
+.app {
+  width: 100%;
+  height: 100%;
+}
 </style>

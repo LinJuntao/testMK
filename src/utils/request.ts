@@ -1,16 +1,25 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
+
+// 定义响应数据的接口
+interface MyInfoResponse {
+  msg: string;
+  msgDev: string;
+  response: any;
+  status: number;
+  success: boolean;
+}
 
 //创建axios实例
 const request = axios.create({
   baseURL: '/api',
   timeout: 5000,
   withCredentials: true, // 异步请求携带cookie
-	headers: {
-		// 设置后端需要的传参类型
-		'Content-Type': 'application/json',
-		// 'token': 'your token',
-		'X-Requested-With': 'XMLHttpRequest',
-	},
+  headers: {
+    // 设置后端需要的传参类型
+    'Content-Type': 'application/json',
+    // 'token': 'your token',
+    'X-Requested-With': 'XMLHttpRequest'
+  }
 });
 //请求拦截器
 request.interceptors.request.use(
@@ -21,10 +30,10 @@ request.interceptors.request.use(
     //   config.headers.Authorization = `Bearer ${token}`;
     // }
     return config;
-  }, 
+  },
   (error) => {
-    console.log(error)
-    return Promise.reject(error)
+    console.log(error);
+    return Promise.reject(error);
   }
 );
 //响应拦截器
@@ -57,4 +66,3 @@ request.interceptors.response.use(
   }
 );
 export default request;
-
