@@ -2,6 +2,8 @@ export interface LoginObj {
   name: string;
   password: string;
   orgID: number;
+  orgArrValue: any;
+  orgArrLabel: any;
 }
 
 export interface OrgObj {

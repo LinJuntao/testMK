@@ -20,19 +20,21 @@ export const reqPost = async (url: string, data: any) => {
 };
 
 //  获取角色组织
-export const GetUserOrgList = (data: any) => {
-  return request({
+export const GetUserOrgList = async (data: any) => {
+  const res = await request({
     url: '/Login/GetUserOrgList',
     method: 'get',
     params: data
   });
+  return res.data;
 };
 
 // 登录
-export const LoginGetToken = (data: any) => {
-  return request({
+export const LoginGetToken = async (data: any) => {
+  const res = await request({
     url: '/Login/GetToken',
     method: 'get',
     params: data
   });
+  return res.data;
 };

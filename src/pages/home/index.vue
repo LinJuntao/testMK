@@ -10,36 +10,44 @@
         @blur="GetOrgList"
       >
       </t-input>
-    </div>
-    <div style="z-index: 0">
-      <div class="placeholder"></div>
       <t-input
-        v-model="passWord"
+        v-model="Login.password"
         label="密码"
         type="password"
+        placeholder="请输入密码"
         default-value=""
-        :clearable="false"
+        :clearable="true"
       ></t-input>
       <t-cell
         arrow
         title="组织"
-        style="font-size: 16px"
-        :note="cityState.city.join(' ')"
-        @click="cityState.show = true"
+        class="fs15"
+        :note="Login.orgArrLabel.join(' ')"
+        @click="changeObjList(true)"
       />
-      <t-popup v-model="cityState.show" placement="bottom">
+    </div>
+    <div style="z-index: 0">
+      <t-popup
+        v-model="cityState.show"
+        class="fs15"
+        style="font-size: 25px"
+        title="请选择组织"
+        placement="bottom"
+      >
         <t-picker
-          v-model="cityState.city"
-          :columns="cityOptions"
+          v-model="Login.orgArrValue"
+          :columns="orgoptions"
           @confirm="onConfirm"
-          @cancel="cityState.show = true"
+          @cancel="changeObjList(false)"
           @pick="onPick"
         />
       </t-popup>
-
-      <div class="placeholder"></div>
-
-      <t-button theme="primary" size="large" block class="rectangle-button"
+      <t-button
+        theme="primary"
+        size="large"
+        block
+        class="rectangle-button"
+        @click="submitLogin"
         >登录</t-button
       >
     </div>
@@ -59,14 +67,42 @@
 // 引入首页筛选组件
 import { Ref, onMounted, reactive, ref } from 'vue';
 import { LoginObj, OrgObj } from './types/index';
-import { reqGet, GetUserOrgList } from '../../api/login/loginAction';
+import {
+  reqGet,
+  GetUserOrgList,
+  LoginGetToken
+} from '../../api/login/loginAction';
 import { Message } from 'tdesign-mobile-vue';
+
+const showMessage = (
+  theme: string,
+  content = '这是一条普通通知信息',
+  duration = 1000
+) => {
+  if (Message[theme]) {
+    Message[theme]({
+      offset: [10, 16],
+      content,
+      duration,
+      icon: true,
+      zIndex: 9999,
+      context: document.querySelector('.button-demo')
+    });
+  }
+};
+
+const cityState = reactive({
+  show: false,
+  city: []
+});
 
 // 获取用户信息
 let Login: Ref<LoginObj> = ref({
   name: '',
   password: '',
-  orgID: 0
+  orgID: 0,
+  orgArrValue: [],
+  orgArrLabel: []
 });
 
 const msgVisible = ref(false);
@@ -78,38 +114,51 @@ const onChange = (val: string) => {
 
 const userName = ref('');
 const passWord = '';
-const org: any[] = [];
-const cityState = reactive({
-  show: false,
-  city: []
-});
-const cityOptions = [
-  [
-    // {
-    //   label: '北京市',
-    //   value: '北京市',
-    // }
-  ]
-];
+// const cityState = reactive({
+//   show: false,
+//   obj: []
+// });
+
+let orgoptions: any[] = [];
 
 const GetOrgList = async () => {
   const name = Login.value.name;
   if (!name) return;
   try {
     const res = await GetUserOrgList({ name });
-    // const response = res.response;
+    const response = res.response;
+    if (response.length > 0) {
+      const row = response[0];
+      Login.value.orgArrLabel = [row.name];
+      Login.value.orgArrValue = [row.ID];
+    }
 
-    console.log('res', res);
+    const org: any[] = [];
+    response.forEach((ele: any) => {
+      org.push({
+        label: ele.name,
+        value: ele.ID
+      });
+    });
+
+    orgoptions = [org];
   } catch (error: any) {
     msgContent.value = error.message;
     msgVisible.value = true;
   }
 };
 
-const onConfirm = (val: string[], context: number[]) => {
-  console.log(val);
-  console.log('context', context);
-  cityState.show = false;
+const changeObjList = (show: boolean) => {
+  if (orgoptions.length === 0) {
+    return;
+  }
+  cityState.show = show;
+};
+
+const onConfirm = (val: string[], context: any) => {
+  Login.value.orgArrValue = val;
+  Login.value.orgArrLabel = context.label;
+  changeObjList(false);
 };
 
 const onPick = (value: [], context: any) => {
@@ -117,17 +166,15 @@ const onPick = (value: [], context: any) => {
   console.log('context', context);
 };
 
-//标签栏
-const tabValue = ref('label_1');
-const tabList = ref([
-  { value: 'label_1', label: '首页', icon: 'home', path: '/' },
-  { value: 'label_2', label: '我的', icon: 'user', path: '/my' }
-]);
-
-//活动跳转
-const currentTab = ref('first');
-const switchTab = (value: string) => {
-  currentTab.value = value;
+const submitLogin = async () => {
+  const orgArrValue = Login.value.orgArrValue;
+  if (orgArrValue.length === 0) return;
+  Login.value.orgID = orgArrValue[0];
+  const ref = await LoginGetToken(Login.value);
+  if (ref.success) {
+    showMessage('success', '登录成功');
+    console.log(ref);
+  }
 };
 </script>
 
@@ -145,15 +192,22 @@ const switchTab = (value: string) => {
     background-position: center center; /* 背景图像居中 */
   }
   .titleLogin {
-    width: 300px;
+    width: 100%;
     height: 28px;
     opacity: 1;
     color: #000000e6;
     font-size: 20px;
     font-weight: 600;
     font-family: 'PingFang SC';
-    text-align: left;
+    text-align: center;
     line-height: 28px;
+  }
+  .fs15 {
+    font-size: 15px;
+  }
+  .rectangle-button {
+    width: 90%;
+    margin: 0 auto;
   }
 }
 </style>

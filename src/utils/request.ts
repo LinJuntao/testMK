@@ -15,20 +15,14 @@ const request = axios.create({
   timeout: 5000,
   withCredentials: true, // 异步请求携带cookie
   headers: {
-    // 设置后端需要的传参类型
     'Content-Type': 'application/json',
-    // 'token': 'your token',
     'X-Requested-With': 'XMLHttpRequest'
   }
 });
+
 //请求拦截器
 request.interceptors.request.use(
   (config) => {
-    // // 在发送请求之前做些什么，比如设置token
-    // const token = localStorage.getItem('token');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
     return config;
   },
   (error) => {
@@ -36,10 +30,16 @@ request.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
 //响应拦截器
 request.interceptors.response.use(
   (response) => {
-    return response.data;
+    // 在这里判断响应是否符合预期的结构，如果不符合则抛出错误
+    if (response.data && response.data.response) {
+      return response;
+    } else {
+      throw new Error('响应数据格式错误');
+    }
   },
   (error) => {
     //处理网络错误
@@ -65,4 +65,5 @@ request.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 export default request;
