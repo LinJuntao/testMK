@@ -72,24 +72,8 @@ import {
   GetUserOrgList,
   LoginGetToken
 } from '../../api/login/loginAction';
-import { Message } from 'tdesign-mobile-vue';
-
-const showMessage = (
-  theme: string,
-  content = '这是一条普通通知信息',
-  duration = 1000
-) => {
-  if (Message[theme]) {
-    Message[theme]({
-      offset: [10, 16],
-      content,
-      duration,
-      icon: true,
-      zIndex: 9999,
-      context: document.querySelector('.button-demo')
-    });
-  }
-};
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
 const cityState = reactive({
   show: false,
@@ -107,17 +91,6 @@ let Login: Ref<LoginObj> = ref({
 
 const msgVisible = ref(false);
 const msgContent = ref('');
-
-const onChange = (val: string) => {
-  console.log('change: ', val);
-};
-
-const userName = ref('');
-const passWord = '';
-// const cityState = reactive({
-//   show: false,
-//   obj: []
-// });
 
 let orgoptions: any[] = [];
 
@@ -172,8 +145,12 @@ const submitLogin = async () => {
   Login.value.orgID = orgArrValue[0];
   const ref = await LoginGetToken(Login.value);
   if (ref.success) {
-    showMessage('success', '登录成功');
-    console.log(ref);
+    const response = ref.response;
+    const token = response.token;
+    const token_type = response.token_type;
+    localStorage.setItem('userToken', `${token_type} ${token}`);
+    router.push({ name: 'location' });
+    // console.log(ref);
   }
 };
 </script>

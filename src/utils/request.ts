@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
+import { Message } from 'tdesign-mobile-vue'; // 引入TDesign的Message模块
 
 // 定义响应数据的接口
 interface MyInfoResponse {
@@ -23,6 +24,11 @@ const request = axios.create({
 //请求拦截器
 request.interceptors.request.use(
   (config) => {
+    // 在发送请求之前做些什么，比如设置token
+    const token = localStorage.getItem('userToken');
+    if (token) {
+      config.headers.Authorization = token;
+    }
     return config;
   },
   (error) => {
@@ -36,6 +42,7 @@ request.interceptors.response.use(
   (response) => {
     // 在这里判断响应是否符合预期的结构，如果不符合则抛出错误
     if (response.data && response.data.response) {
+      Message.success(response.data.msg); // 显示成功提示框
       return response;
     } else {
       throw new Error('响应数据格式错误');
@@ -62,6 +69,7 @@ request.interceptors.response.use(
       default:
         msg = '无网络';
     }
+    Message.error(msg); // 显示错误提示框
     return Promise.reject(error);
   }
 );

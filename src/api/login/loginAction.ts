@@ -38,3 +38,13 @@ export const LoginGetToken = async (data: any) => {
   });
   return res.data;
 };
+
+// 获取菜单
+export const GetMenu = async (data: any) => {
+  const res = await request({
+    url: '/permission/GetMenu',
+    method: 'get',
+    params: data
+  });
+  return res.data;
+};
