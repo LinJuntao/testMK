@@ -35,6 +35,7 @@
         placement="bottom"
       >
         <t-picker
+          class="fs20"
           v-model="Login.orgArrValue"
           :columns="orgoptions"
           @confirm="onConfirm"
@@ -181,6 +182,9 @@ const submitLogin = async () => {
   }
   .fs15 {
     font-size: 15px;
+  }
+  .fs20 {
+    font-size: 20px;
   }
   .rectangle-button {
     width: 90%;
