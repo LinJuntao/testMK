@@ -1,14 +1,6 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 import { Message } from 'tdesign-mobile-vue'; // 引入TDesign的Message模块
-
-// 定义响应数据的接口
-interface MyInfoResponse {
-  msg: string;
-  msgDev: string;
-  response: any;
-  status: number;
-  success: boolean;
-}
+import router from '../router/index';
 
 //创建axios实例
 const request = axios.create({
@@ -42,7 +34,11 @@ request.interceptors.response.use(
   (response) => {
     // 在这里判断响应是否符合预期的结构，如果不符合则抛出错误
     if (response.data && response.data.response) {
-      Message.success(response.data.msg); // 显示成功提示框
+      console.log(response);
+      if (!response.config.noshowMsg) {
+        Message.success(response.data.msg); // 显示成功提示框
+      }
+      // Message.success(response.data.msg); // 显示成功提示框
       return response;
     } else {
       throw new Error('响应数据格式错误');
@@ -56,6 +52,7 @@ request.interceptors.response.use(
     switch (status) {
       case 401:
         msg = 'token过期';
+        router.push({ name: 'Home' });
         break;
       case 403:
         msg = '无权访问';

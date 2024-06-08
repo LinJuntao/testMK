@@ -24,7 +24,8 @@ export const GetUserOrgList = async (data: any) => {
   const res = await request({
     url: '/Login/GetUserOrgList',
     method: 'get',
-    params: data
+    params: data,
+    noshowMsg: true
   });
   return res.data;
 };
@@ -44,7 +45,8 @@ export const GetMenu = async (data: any) => {
   const res = await request({
     url: '/permission/GetMenu',
     method: 'get',
-    params: data
+    params: data,
+    noshowMsg: true
   });
   return res.data;
 };

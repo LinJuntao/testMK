@@ -1,24 +1,6 @@
 <template>
   <div class="app-contain">
-    <t-navbar title="首页" :title-max-length="5" :fixed="false">
-      <template #capsule>
-        <div class="custom-capsule">
-          <t-icon
-            name="chevron-left"
-            size="20px"
-            class="custom-capsule__icon"
-            @click="handleClick('chevron')"
-          />
-          <t-divider layout="vertical" />
-          <t-icon
-            name="home"
-            size="20px"
-            class="custom-capsule__icon"
-            @click="handleClick('home')"
-          />
-        </div>
-      </template>
-    </t-navbar>
+    <HomeNav title="首页" :isGoPrevious="0"></HomeNav>
     <div class="box">
       <t-collapse expand-mutex :value="values" @change="handleChange">
         <t-collapse-panel
@@ -49,28 +31,24 @@
 <script lang="ts" setup>
 import { ref, onMounted, h, onBeforeMount } from 'vue';
 import { Icon } from 'tdesign-icons-vue-next';
-
+import HomeNav from '../../components/HomeNav.vue';
 import { GetMenu } from '../../api/login/loginAction';
 import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const values = ref([0]);
 
-const handleClick = (val: string) => {
-  if (val === 'chevron') {
-    router.push({
-      name: 'Home'
-    });
-  }
-  console.log('left-click', val);
-};
-
 const handleChange = (val: number[]) => {
   values.value = val;
 };
 
 const changeBoxs = (val: any) => {
-  console.log(val);
+  const code = val.code;
+  router.push({
+    path: code
+  });
+  // const code = data.code;
+  console.log(code);
 };
 
 // 获取菜单
@@ -106,6 +84,11 @@ onMounted(async () => {
       margin-right: 10px;
       display: flex;
       flex-wrap: wrap;
+      border-radius: 10px;
+      border: 1px solid gainsboro;
+      padding: 5px 0;
+      margin-bottom: 10px;
+
       .iconbox {
         display: block;
         width: 50px;
@@ -119,40 +102,6 @@ onMounted(async () => {
         padding-top: 10px;
       }
     }
-  }
-}
-
-.t-navbar {
-  margin-bottom: 16px;
-}
-
-.t-icon-close {
-  margin: 0 8px;
-}
-
-.t-icon-home {
-  margin-right: 8px;
-}
-
-.custom-capsule {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.custom-capsule__icon {
-  flex: 1;
-  position: relative;
-  margin: 0;
-}
-
-.custom-capsule :deep(.t-divider--vertical-center) :deep(.t-divider--vertical) {
-  margin: 0;
-}
-.t-demo-iconfont {
-  .t-icon {
-    margin-right: 24px;
   }
 }
 </style>
