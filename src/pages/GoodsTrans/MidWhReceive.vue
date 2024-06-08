@@ -1,6 +1,9 @@
 <template>
   <div class="app-contain">
     <HomeNav title="中转仓接收" :isGoPrevious="1" pathURL="/location"></HomeNav>
+    <!-- <div style="width: 100%; height: 50px">
+      <QrcodeReader @decode="onDecode" :debug="false" :captureInterval="500" />
+    </div> -->
     <div class="box">
       <t-form
         class="tform"
@@ -15,6 +18,8 @@
             v-model="formData.vouchCode"
             borderless
             placeholder="请输入出货单号"
+            clearable
+            :onBlur="onBlurChange"
           >
             <template #suffix>
               <div class="suffix">
@@ -51,6 +56,7 @@
         :bordered="bordered"
         :show-header="showHeader"
         cell-empty-content="-"
+        height="500px"
         @row-click="handleRowClick"
         @cell-click="handleCellClick"
         @scroll="handleScroll"
@@ -75,6 +81,7 @@
         >
       </div>
     </div>
+    <video ref="video" style="display: none"></video>
   </div>
 </template>
 
@@ -82,6 +89,13 @@
 import { ref, reactive, onMounted, h, onBeforeMount } from 'vue';
 import { Icon } from 'tdesign-icons-vue-next';
 import HomeNav from '../../components/HomeNav.vue';
+import QrcodeReader from 'vue3-qrcode-reader';
+const scannedResult = ref<string>('');
+
+const onDecode = (content: string) => {
+  scannedResult.value = content;
+};
+
 import {
   GetMidReciveInfo,
   GetWareHouse,
@@ -93,7 +107,7 @@ let formData = reactive({
   whID: 0,
   whName: ''
 });
-let data: any[] = [];
+let data = ref<any[]>([]);
 let orgoptions: any[] = [];
 const stateArr = reactive({
   show: false,
@@ -146,11 +160,44 @@ const onPick = (value: [], context: any) => {
 };
 
 // form
+const onBlurChange = async (value: string, context: { e: FocusEvent }) => {
+  if (!value) return;
+  const obj = {
+    vouchCode: value
+  };
+  const ref = await GetMidReciveInfo(obj);
+  const response = ref.response;
+
+  const whID = whIDs[0];
+  const org: any[] = [];
+  response.forEach((ele: any) => {
+    org.push({
+      ID: ele.ID,
+      whID: whID,
+      cBatch: ele.cBatch,
+      iNum: ele.iNum,
+      iQty: ele.iQty,
+      invStd: ele.invStd,
+      cLev: ele.cLev
+    });
+  });
+  console.log(org);
+  data.value = org;
+  // console.log(whIDs);
+  // console.log(ref);
+  // console.log('===onBlurChange', value, context);
+};
+
 const onReset = () => {
+  data.value = [];
+  formData.vouchCode = '';
   console.log('===onReset');
 };
 
-const onSubmit = (e: any) => {
+const onSubmit = async (e: any) => {
+  const vouchCode = formData.vouchCode;
+  const ref = await ConfirmMidRecive(data, vouchCode);
+  onReset();
   console.log('===onSubmit', e);
 };
 
@@ -182,7 +229,8 @@ const handleRowClick = (e: any) => {
   position: relative;
   .box {
     width: 100%;
-    height: 100%;
+    height: calc(100% - 60px);
+    overflow-y: auto;
     .tform {
       width: 96%;
       margin: 0 auto;

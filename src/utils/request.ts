@@ -34,13 +34,14 @@ request.interceptors.response.use(
   (response) => {
     // 在这里判断响应是否符合预期的结构，如果不符合则抛出错误
     if (response.data && response.data.response) {
-      console.log(response);
+      // console.log(response);
       if (!response.config.noshowMsg) {
         Message.success(response.data.msg); // 显示成功提示框
       }
       // Message.success(response.data.msg); // 显示成功提示框
       return response;
     } else {
+      Message.error(response.data.msg);
       throw new Error('响应数据格式错误');
     }
   },
