@@ -23,6 +23,12 @@
           />
         </div>
       </template>
+      <template #right>
+        <span class="logoutbox" @click="logoutBtn">
+          注销
+          <t-icon name="logout" size="24px" />
+        </span>
+      </template>
     </t-navbar>
   </div>
 </template>
@@ -53,6 +59,11 @@ const handleClick = (val: string) => {
     });
   }
   console.log('left-click', val);
+};
+
+const logoutBtn = () => {
+  localStorage.removeItem('userToken');
+  router.push({ name: 'Home' });
 };
 </script>
 <style scoped lang="less">
@@ -99,5 +110,10 @@ const handleClick = (val: string) => {
   .t-icon {
     margin-right: 24px;
   }
+}
+
+.logoutbox {
+  line-height: 30px;
+  color: #2e65db;
 }
 </style>

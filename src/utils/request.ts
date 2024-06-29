@@ -53,6 +53,7 @@ request.interceptors.response.use(
     switch (status) {
       case 401:
         msg = 'token过期';
+        localStorage.removeItem('userToken');
         router.push({ name: 'Home' });
         break;
       case 403:
