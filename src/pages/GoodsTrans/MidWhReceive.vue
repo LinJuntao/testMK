@@ -50,7 +50,8 @@
       </t-form>
       <t-table
         class="ttable"
-        row-key="index"
+        type="radio"
+        row-key="ID"
         :data="data"
         :columns="columns"
         :bordered="bordered"
@@ -60,7 +61,19 @@
         @row-click="handleRowClick"
         @cell-click="handleCellClick"
         @scroll="handleScroll"
-      ></t-table>
+      >
+        <template #type-slot-checkbox="{ col, row, rowIndex }">
+          <!-- 自定义单元格 -->
+          <div>
+            <t-checkbox
+              v-model="row.selected"
+              icon="rectangle"
+              default-checked
+              @change="(checked: boolean) => handleRowSelect(row, rowIndex,checked)"
+            />
+          </div>
+        </template>
+      </t-table>
 
       <div class="button-group">
         <t-button
@@ -105,7 +118,8 @@ import {
 let formData = reactive({
   vouchCode: '',
   whID: 0,
-  whName: ''
+  whName: '',
+  isAllSelected: false // 初始化全选状态
 });
 let data = ref<any[]>([]);
 let orgoptions: any[] = [];
@@ -178,7 +192,8 @@ const onBlurChange = async (value: string, context: { e: FocusEvent }) => {
       iNum: ele.iNum,
       iQty: ele.iQty,
       invStd: ele.invStd,
-      cLev: ele.cLev
+      cLev: ele.cLev,
+      selected: false // 添加选中状态
     });
   });
   console.log(org);
@@ -202,6 +217,20 @@ const onSubmit = async (e: any) => {
 };
 
 const columns = ref([
+  {
+    colKey: 'checkbox',
+    title: () => {
+      return h('div', {
+        class: formData.isAllSelected ? 'checkedList' : 'uncheckedList',
+        onClick: () => {
+          toggleSelectAll(!formData.isAllSelected);
+        }
+      });
+    },
+    width: 60,
+    // 这里定义了自定义单元格内容
+    cell: 'type-slot-checkbox'
+  },
   { colKey: 'cBatch', title: '卷号', ellipsis: true },
   { colKey: 'iNum', title: '重量', ellipsis: true },
   { colKey: 'iQty', title: '米数', ellipsis: true },
@@ -217,8 +246,30 @@ const handleScroll = (e: any) => {
 const handleCellClick = (e: any) => {
   console.log('cell-cliek=====', e);
 };
-const handleRowClick = (e: any) => {
-  console.log('row-cliek=====', e);
+
+// 用于全选/全消的函数
+const toggleSelectAll = (isAllSelected: boolean) => {
+  console.log(isAllSelected, 'isAllSelected');
+  formData.isAllSelected = isAllSelected;
+  data.value.forEach((row) => {
+    row.selected = isAllSelected;
+  });
+};
+
+// 用于处理单行选择的函数
+const handleRowSelect = (row,rowIndex, checked) => {
+  console.log(row, rowIndex, checked);
+  data.value[rowIndex].selected = checked;
+};
+const handleRowClick = (row: any, event: any) => {
+  // console.log('row-cliek=====', e);
+  data.value.forEach((item, index) => {
+    if (index === row.index) {
+      item.selected = true; // 设置当前行为选中状态
+    } else {
+      item.selected = false; // 取消其他行的选中状态
+    }
+  });
 };
 </script>
 <style lang="less" scoped>
